@@ -395,15 +395,22 @@
 
         .summary-title {
             font-size: 2.5em;
-            color: #333;
+            color: #f5f5dc;
             margin-bottom: 30px;
+        }
+
+        #summary-text {
+            color: #f5f5dc;
+            font-size: 1em;
+            margin-bottom: 30px;
+            white-space: pre-line;
         }
 
         .score-circle {
             width: 200px;
             height: 200px;
             border-radius: 50%;
-            background: conic-gradient(#4CAF50 0deg, #4CAF50 var(--score-angle), #eee var(--score-angle));
+            background: conic-gradient(#e6cb1b 0deg, #edd711 var(--score-angle), #eee var(--score-angle));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -425,7 +432,7 @@
             z-index: 1;
             font-size: 2em;
             font-weight: bold;
-            color: #333;
+            color: #242420;
         }
 
         .back-btn {
@@ -581,7 +588,6 @@
                 height: 350px;
                 margin: 10px auto;
             }
-            
             .review-container {
                 padding: 15px;
                 bottom: 10px;
@@ -825,11 +831,11 @@
         <!-- 总结页面 -->
         <div id="summary-page" class="hidden">
             <div class="summary-container">
-                <h2 class="summary-title">练习完成！</h2>
+                <h2 class="summary-title">Good Job!</h2>
                 <div class="score-circle" id="score-circle">
                     <div class="score-text" id="final-score">0%</div>
                 </div>
-                <p id="summary-text">恭喜你完成了第一课的所有练习！</p>
+                <p id="summary-text">Congratulations! You have completed all the exercises></p>
                 <button class="back-btn" onclick="showMain()">Home</button>
             </div>
         </div>
@@ -1319,36 +1325,89 @@
                 '十': 'shi'
             };
             const key = map[hanzi];
-            return key ? `01audio/${key}.mp3` : '';
+            return key ? `audio/${key}.mp3` : '';
         }
 
         function speakFallback(text) {
+            console.log('=== 语音合成开始 ===');
+            console.log('要播放的文本:', text);
+            console.log('浏览器支持语音合成:', 'speechSynthesis' in window);
+            
             try {
+                // 停止任何正在播放的语音
+                window.speechSynthesis.cancel();
+                
                 const utter = new SpeechSynthesisUtterance(text);
                 utter.lang = 'zh-CN';
-                window.speechSynthesis.cancel();
+                utter.rate = 0.8;
+                utter.pitch = 1;
+                utter.volume = 1;
+                
+                console.log('语音合成对象:', utter);
+                console.log('语音合成语言:', utter.lang);
+                
+                // 添加事件监听器
+                utter.onstart = () => console.log('语音合成开始播放');
+                utter.onend = () => console.log('语音合成播放结束');
+                utter.onerror = (e) => console.error('语音合成错误:', e);
+                
                 window.speechSynthesis.speak(utter);
+                console.log('语音合成已调用');
+                
             } catch (e) {
-                // 忽略语音合成不可用的情况
+                console.error('语音合成异常:', e);
             }
         }
 
-        function playReviewAudio() {
-            event.stopPropagation();
+        function playReviewAudio(event) {
+            if (event) event.stopPropagation();
+            
+            console.log('=== 开始播放复习音频 ===');
             const data = hanziData[currentCardIndex];
+            console.log('当前汉字数据:', data);
+            console.log('当前卡片索引:', currentCardIndex);
+            
             const audioEl = document.getElementById('review-audio');
-            if (!audioEl) return;
+            console.log('音频元素:', audioEl);
+            
+            if (!audioEl) {
+                console.error('找不到音频元素');
+                return;
+            }
 
-            // 设置一次性错误回退
+            const audioSrc = getAudioSrcForHanzi(data.hanzi);
+            console.log('音频源路径:', audioSrc);
+
+            // 设置错误处理
             const onError = () => {
+                console.error('音频文件加载失败:', audioSrc);
                 audioEl.removeEventListener('error', onError);
-                speakFallback(data.hanzi);
             };
-            audioEl.removeEventListener('error', onError);
-            audioEl.addEventListener('error', onError, { once: true });
+            
+            const onLoadStart = () => {
+                console.log('开始加载音频文件:', audioSrc);
+            };
+            
+            const onCanPlay = () => {
+                console.log('音频文件可以播放');
+            };
 
-            audioEl.src = getAudioSrcForHanzi(data.hanzi);
-            audioEl.play().catch(() => speakFallback(data.hanzi));
+            audioEl.removeEventListener('error', onError);
+            audioEl.removeEventListener('loadstart', onLoadStart);
+            audioEl.removeEventListener('canplay', onCanPlay);
+            
+            audioEl.addEventListener('error', onError, { once: true });
+            audioEl.addEventListener('loadstart', onLoadStart, { once: true });
+            audioEl.addEventListener('canplay', onCanPlay, { once: true });
+
+            audioEl.src = audioSrc;
+            audioEl.load(); // 强制重新加载
+            
+            audioEl.play().then(() => {
+                console.log('音频播放成功');
+            }).catch((error) => {
+                console.error('音频播放失败:', error);
+            });
         }
 
         function showSummary() {
@@ -1362,18 +1421,18 @@
             document.getElementById('final-score').textContent = `${percentage}%`;
             document.getElementById('score-circle').style.setProperty('--score-angle', `${percentage * 3.6}deg`);
             
-            let summaryText = `恭喜你完成了第一课的所有练习！\n`;
-            summaryText += `总得分: ${totalScore} / ${totalQuestions}\n`;
-            summaryText += `正确率: ${percentage}%`;
+            let summaryText = `Congratulations! You have completed all the exercises!\n\n`;
+            summaryText += `Total Score: ${totalScore} / ${totalQuestions}\n`;
+            summaryText += `Accuracy: ${percentage}%`;
             
             if (percentage >= 90) {
-                summaryText += `\n\n🎉 优秀！你的表现非常出色！`;
+                summaryText += `\n\n🎉 Excellent! Outstanding performance!`;
             } else if (percentage >= 80) {
-                summaryText += `\n\n👍 很好！继续加油！`;
+                summaryText += `\n\n👍 Great job! Keep it up!`;
             } else if (percentage >= 70) {
-                summaryText += `\n\n💪 不错！再练习一下会更好！`;
+                summaryText += `\n\n💪 Good work! Practice more to improve!`;
             } else {
-                summaryText += `\n\n📚 需要多加练习，加油！`;
+                summaryText += `\n\🤩 Keep practicing, you can do it!`;
             }
             
             document.getElementById('summary-text').textContent = summaryText;
