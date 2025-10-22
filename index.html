@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01</title>
+    <link rel="stylesheet" href="//at.alicdn.com/t/c/font_5046375_njawe1hwe8.css">
+    <style>
+        * {
+            margin: 0px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', 'Didot', 'Futura', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #2d2d42;
+            min-height: 100vh;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        /* 汉字使用楷体 */
+        .hanzi, #hanzi-display, .question, .option, .phone-display, .pinyin, .meaning {
+            font-family: 'KaiTi', '楷体', 'STKaiti', '华文楷体', serif !important;
+        }
+
+        .title {
+            font-size: 2.2em;
+            color: #efebe893;
+            margin-bottom: 40px;
+            font-weight: 700px;
+            text-align: center;
+        }
+        .review-title {
+            font-size: 1.5em;      /* 把它改小一点 */
+            color: #585858ae;     /* 把它改成蓝色 */
+            margin-bottom: 20px; /* 减小下方的间距 */
+            text-align: center;  /* 【关键】让它居中，而不是像主标题一样左对齐 */
+}
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .modules {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            margin-bottom: 30px;
+        }
+
+        .module {
+            background: linear-gradient(135deg, #d9acd8, #97679a);
+            color: rgba(246, 246, 240, 0.972);
+            padding: 30px 100px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+        }
+
+        .module:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .module h3 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .module p {
+            font-size: 1.1em;
+            opacity: 0.7;
+        }
+
+        .practice-module {
+            background: linear-gradient(135deg, #86c2c2, #69c4ef);
+        }
+
+        .hidden {
+            display: none !important; /* 保证完全隐藏 */
+        }
+        
+
+        /* 复习模块样式 */
+        /* 就是就是那个白色的、带圆角和阴影的“画框”。*/
+        .review-container {
+            text-align: center;
+            background: rgb(255, 253, 253, 1);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0);
+            padding: 20px;
+            max-width: 800px;
+            width: 100%;
+            /* 1. 开启相对定位 */
+            position: relative;
+        /* 2. 相对于它的底部，向上推20px */
+            bottom: 10px;
+        }
+
+        .flashcard {
+            width: 400px;
+            height: 300px;
+            margin: 60px auto;
+            perspective: 1000px;
+            position: relative; /* 便于将首页按钮固定在白色框内 */
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .card-front {
+            background: linear-gradient(120deg, #f7f7ed, #f7f7ed);
+            color: #282d5e;
+        }
+
+        .card-back {
+            background: linear-gradient(180deg, #f6f7f2, #f5f6f2);
+            color: #282d5e;
+            transform: rotateY(180deg);
+            flex-direction: column;
+        
+        }
+
+        .pinyin {
+            font-size: 0.7em;
+            margin-bottom: 15px;
+        }
+
+        .meaning {
+            font-size: 0.4em;
+            opacity: 0.9;
+        }
+
+        .navigation {
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            background: #595062;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .nav-btn:hover {
+            background: #fcb662;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 练习模块样式 */
+        .practice-container {
+            text-align: center;
+            position: relative; /* 便于放置左上角返回按钮 */
+        }
+
+        .practice-nav {
+            display: none; /* 不再使用 */
+        }
+
+        .practice-tab {
+            display: none; /* 不再使用 */
+        }
+
+        .practice-tab.active { display: none; }
+        .practice-tab.locked { display: none; }
+
+        /* 练习中心美化 */
+        .practice-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 上面1、2；下面3、4 */
+            gap: 25px;
+            margin: 10px 0 20px;
+        }
+        .practice-card {
+            position: relative;
+            padding: 20px;
+            border: 2px solid #282d5e;
+            background: #f0e9de;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        }
+        .practice-card:hover {
+            transform: translateY(-2px);
+            border-color: #4ecdc4;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .practice-card.locked {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .practice-card.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-size: 18px;
+        }
+        .practice-card .card-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .practice-card h4 {
+            font-size: 1.1em;
+            margin-bottom: 6px;
+            color: #2d2d42;
+        }
+        .practice-card p {
+            font-size: 0.9em;
+            color: #2d2d42;
+        }
+
+        .back-home-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 8px 14px;
+            border-radius: 18px;
+            border: none;
+            background: #5d7399;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.9em;
+            z-index: 10; /* 确保按钮在最上层 */
+            font-family: 'Roboto', sans-serif;
+        }
+        .back-home-btn:hover { background: #5a6fd8; }
+
+        .practice-content {
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 打字练习输入框样式 */
+        .typing-input {
+            width: 260px;
+            padding: 14px 16px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 1.2em;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s ease;
+            font-family: 'KaiTi', '楷体', 'STKaiti', '华文楷体', serif;
+        }
+        .typing-input:focus { border-color: #4ecdc4; box-shadow: 0 0 0 4px rgba(78,205,196,0.15); }
+        .typing-input.correct { border-color: #feffe4; background: #f0fff2; }
+        .typing-input.incorrect { border-color: #f44336; background: #fff5f4; }
+
+        .question {
+            font-size: 4em;
+            margin: 30px 0 60px 0;
+            color: #fffcfc;
+            font-weight: bold;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .option:hover {
+            border-color: #4ecdc4;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .option.correct {
+            background: #279265;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .option.incorrect {
+            background: #312625;
+            color: white;
+            border-color: #81312b;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            transition: width 0.3s ease;
+        }
+
+        .score-display {
+            font-size: 1.2em;
+            margin: 20px 0;
+            color: #666;
+        }
+
+        .next-btn {
+            background: #595062;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 80px;
+            transition: all 0.3s ease;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .next-btn:hover {
+            background: #fcb662;
+            transform: translateY(-2px);
+        }
+
+        .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .summary-container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .summary-title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(#4CAF50 0deg, #4CAF50 var(--score-angle), #eee var(--score-angle));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            position: relative;
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .score-text {
+            position: relative;
+            z-index: 1;
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .back-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .back-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        /* 手机号练习特殊样式 */
+        .phone-display {
+            font-size: 2.5em;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.1em;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        /* 音频播放按钮 */
+        .audio-btn {
+       
+        /* 1. 使用绝对定位 */
+            position: absolute; /* 让按钮可以相对于父容器自由移动 */
+            top:100%;
+            left:50%;
+            bottom: 80px;       /* 距离底部 15px */
+            right: 50%;        /* 距离右边 15px */
+
+        /* 2. 变成一个圆形小按钮 */
+            width: 50px;
+            height: 50px;
+            border-radius: 50%; /* 50% = 正圆形 */
+            padding: 0;         /* 移除内边距 */
+        /* 3. 美化 */
+            background:transparent;
+            color: rgb(241, 231, 231,);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 0%;
+            cursor: pointer;
+            font-size: 0.3em;
+            transition: all 0.3s ease;
+            font-family: 'Roboto', sans-serif; 
+        /* 4. (新增) 确保图标完美居中 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .audio-btn:hover {
+            background:transparent;
+            transform: translateY(-2px);
+        }
+
+        /* 复习闪卡内的音频按钮放在拼音与英文下面，改为常规按钮布局 */
+        .card-face .audio-btn {
+            position: static;
+            top: auto;
+            left: auto;
+            right: auto;
+            bottom: auto;
+            width: auto;
+            height: auto;
+            border-radius: 25px;
+            padding: 8px 16px;
+            margin-top: 10px;
+            background: transparent;
+            color: rgb(203, 172, 172);
+        }
+        
+        /* 练习4音频按钮 - 强制覆盖绝对定位，只在练习4显示 */
+        #audio-question-btn {
+            position: static !important;
+            top: auto !important;
+            left: auto !important;
+            bottom: auto !important;
+            right: auto !important;
+            width: 80px !important;
+            height: 80px !important;
+            border-radius: 50% !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            font-size: 2em !important;
+            margin: 20px auto !important;
+            display: block !important;
+            color: rgb(203, 172, 172) !important;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+            line-height: 1 !important;
+            padding: 0 !important;
+        }
+        
+        
+        
+        /* 确保音频按钮只在练习4显示，其他练习隐藏 */
+        .practice-content:not(.practice-4) #audio-question-btn {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            /* 主页容器样式 - 强制覆盖 */
+            #main-page {
+                width: 78% !important;
+                max-width: none !important;
+                box-sizing: border-box;
+                padding: 5px;
+                margin: 10px;
+            }
+            
+            /* 闪卡页面容器样式 - 强制覆盖 */
+            #review-page {
+                width: 95% !important;
+                max-width: none !important;
+                min-height: 600px;
+                padding: 5px;
+                margin: 10px;
+                padding-top: 40px;
+            }
+            
+            /* 练习页面容器样式 */
+            #practice-page {
+                width: 95% !important;
+                max-width: none !important;
+                padding: 5px;
+                margin: 10px;
+            }
+            .modules, .practice-grid, .options {
+                grid-template-columns: 1fr; /* 关键：所有网格布局都变成单列 */
+            }
+            /*练习1四个答案选项*/ 
+            .options {
+                grid-template-columns: repeat(2, 1fr);
+                margin-top: -50px;
+            }
+            /* h2 标题位置*/ 
+            .question {
+                font-size: 4em;
+                margin-top: -80px;
+            }
+            
+            .flashcard {
+                width: 95%;
+                height: 350px;
+                margin: 10px auto;
+            }
+            
+            .review-container {
+                padding: 15px;
+                bottom: 10px;
+                position: relative;
+            }
+            
+            .card-face {
+                font-size: 0.8em;
+                padding: 15px;
+            }
+            
+            .card-face h2 {
+                font-size: 2em;
+                margin-bottom: 8px;
+            }
+            
+            .card-face .pinyin {
+                font-size: 1em;
+                margin-bottom: 6px;
+            }
+            
+            .card-face .meaning {
+                font-size: 0.9em;
+                margin-bottom: 6px;
+            }
+            /* 移动端练习中心改为单列 */
+            .practice-grid { grid-template-columns: 1fr; }
+            
+            /* 移动端优化 */
+            /* HTML 中任何带有 class="title" 的标题元素。*/
+            .title {
+                font-size: 2.5em;
+                margin-bottom: 30px;
+            }
+            /*HTML 中任何带有 class="subtitle" 的元素*/
+            .subtitle {
+                font-size: 1em;
+                margin-bottom: 5px;
+            }
+            
+            .module {
+                padding: 60px 20px; 
+                /*adding: 60px 20px;: 设置按钮的内边距。按钮内部文字的上方和下方，各增加 60px 的空白空间。在文字的左方和右方，各增加 20px 的空白空间。*/
+                margin-bottom: 5px;
+                /*设置按钮的下外边距*/
+                min-height: 100px;
+            }
+            /*两个模块之间的距离*/
+            .module:nth-child(2) {
+                margin-top: -35px;
+            }
+            
+            .module h3 {
+                font-size: 2.2em;
+            }
+            
+            .module p {
+                font-size: 1.1em;
+            }
+            
+            .practice-card {
+                padding: 25px;
+                margin-bottom: 5px;
+                min-height: 100px;
+            }
+            
+            .practice-card h4 {
+                font-size: 1.2em;
+            }
+            
+            .practice-card p {
+                font-size: 1em;
+            }
+            
+            .back-home-btn {
+                top: 3px;
+                left: 5px;
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+            
+            .nav-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
+                margin: 0 5px;
+            }
+            
+            .audio-btn {
+                padding: 8px 16px;
+                font-size: 0.8em;
+                margin: 10px 0;
+                width:50px;
+                height:50px;
+
+            }
+            /*练习4 音频图标*边距*/
+            #audio-question-btn {
+                margin-top: 10px;
+                margin-bottom: 20px;
+            }
+            /*手机端next按钮*/
+            .next-btn {
+                padding: 12px 24px;
+                font-size: 1em;
+                margin-top: 35px;
+            }
+            
+            .typing-input {
+                width: 200px;
+                padding: 12px 14px;
+                font-size: 1.1em;
+            }
+            
+            .phone-display {
+                font-size: 2em;
+                margin: 15px 0;
+            }
+            
+            .card-face {
+                font-size: 3em;
+            }
+            
+            .pinyin {
+                font-size: 0.35em;
+            }
+            
+            .meaning {
+                font-size: 0.25em;
+            }
+            
+            .score-circle {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .score-circle::before {
+                width: 110px;
+                height: 110px;
+            }
+            
+            .score-text {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+        <!-- 主页面 -->
+        <div id="main-page" class="main-container">
+            <h1 class="title">01 NUMBERS</h1>            
+            <div class="modules">
+                <a href="#" class="module" onclick="showReview()">
+                    <h3>Review </h3>
+                    <p>Flashcards<br>Click to flip for details</p>
+                </a>
+                
+                <a href="#" class="module practice-module" onclick="showPractice()">
+                    <h3>Practice</h3>
+                    <p>Four Exercises <br>Unlock them step-by-step</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- 复习模块 -->
+        <div id="review-page" class="hidden">
+            <div class="review-page-container">
+                <div class="review-container">
+                <button class="back-home-btn" onclick="showMain()">Home</button>
+                <h2 class="title review-title">Review</h2>
+                <div class="flashcard">
+                    <div class="card" id="flashcard" onclick="flipCard()">
+                        <div class="card-face card-front">
+                            <span id="hanzi-display">一</span>
+                        </div>
+                        <div class="card-face card-back">
+                            <div class="pinyin" id="pinyin-display">yī</div>
+                            <div class="meaning" id="meaning-display">one</div>
+                            <button class="audio-btn" onclick="playReviewAudio(event)">🔊</button>
+                        </div>
+                    </div>
+                </div>
+               
+                <audio id="review-audio" preload="auto"></audio>
+                
+                <div class="navigation">
+                    <button class="nav-btn" id="prev-btn" onclick="prevCard()">Prev</button>
+                    <span id="card-counter">1 / 10</span>
+                    <button class="nav-btn" id="next-btn" onclick="nextCard()">Next</button>
+                </div>
+                
+                 
+            </div>
+            </div>
+        </div>
+
+        <!-- 练习模块 -->
+        <div id="practice-page" class="hidden">
+            <div class="practice-container">
+                <button class="back-home-btn" onclick="showMain()">Home</button>
+                <h2 class="title">Practice</h2>
+                <!-- 练习中心：选择要开始的练习 -->
+                <div id="practice-hub">
+                    <div class="practice-grid">
+                        <div class="practice-card" id="start-0" onclick="startPractice(0)">
+                            <div class="card-icon">➊</div>
+                            <p>Select the character for the number</p>
+                        </div>
+                        <div class="practice-card locked" id="start-1" onclick="startPractice(1)">
+                            <div class="card-icon">➋</div>
+                            <p>Choose the correct pinyin for the Hanzi</p>
+                        </div>
+                        <div class="practice-card locked" id="start-2" onclick="startPractice(2)">
+                            <div class="card-icon">➌</div>
+                            <p>Type the character for the number</p>
+                        </div>
+                        <div class="practice-card locked" id="start-3" onclick="startPractice(3)">
+                            <div class="card-icon">➍</div>
+                            <p>Listen and select the character you hear</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 单题页面：只显示一道题及四个选项 -->
+                <div id="question-page" class="practice-content hidden">
+                    <div class="question" id="question-text"></div>
+                    <div class="phone-display hidden" id="phone-display"></div>
+                    <button class="audio-btn hidden" id="audio-question-btn" onclick="playAudioQuestion()">🔊</button>
+                    <input class="typing-input hidden" id="typing-input" placeholder="请在此处输入" />
+                    <button class="next-btn hidden" id="typing-submit" onclick="submitTyping()">Summit</button>
+                    <div class="options" id="options-box">
+                        <div class="option"></div>
+                        <div class="option"></div>
+                        <div class="option"></div>
+                        <div class="option"></div>
+                    </div>
+                    <button class="next-btn" id="next-practice-btn" onclick="nextPractice()" disabled>Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 总结页面 -->
+        <div id="summary-page" class="hidden">
+            <div class="summary-container">
+                <h2 class="summary-title">练习完成！</h2>
+                <div class="score-circle" id="score-circle">
+                    <div class="score-text" id="final-score">0%</div>
+                </div>
+                <p id="summary-text">恭喜你完成了第一课的所有练习！</p>
+                <button class="back-btn" onclick="showMain()">Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 汉字数据
+        const hanziData = [
+            { hanzi: '一', pinyin: 'yī', meaning: 'one' },
+            { hanzi: '二', pinyin: 'èr', meaning: 'two' },
+            { hanzi: '三', pinyin: 'sān', meaning: 'three' },
+            { hanzi: '四', pinyin: 'sì', meaning: 'four' },
+            { hanzi: '五', pinyin: 'wǔ', meaning: 'five' },
+            { hanzi: '六', pinyin: 'liù', meaning: 'six' },
+            { hanzi: '七', pinyin: 'qī', meaning: 'seven' },
+            { hanzi: '八', pinyin: 'bā', meaning: 'eight' },
+            { hanzi: '九', pinyin: 'jiǔ', meaning: 'nine' },
+            { hanzi: '十', pinyin: 'shí', meaning: 'ten' }
+        ];
+
+        // 全局变量
+        let currentCardIndex = 0;
+        let currentPractice = 0;
+        let practiceScores = [0, 0, 0, 0]; // 每个练习的得分
+        let practiceQuestions = [0, 0, 0, 0]; // 每个练习的题目数
+        let currentQuestion = 0;
+        let isAnswered = false;
+        let currentAudioHanzi = null; // 单题音频题当前正确汉字
+        let currentTypingAnswer = '';
+
+        // 页面切换函数
+        function showMain() {
+            document.getElementById('main-page').classList.remove('hidden');
+            document.getElementById('review-page').classList.add('hidden');
+            document.getElementById('practice-page').classList.add('hidden');
+            document.getElementById('summary-page').classList.add('hidden');
+        }
+
+        function showReview() {
+            document.getElementById('main-page').classList.add('hidden');
+            document.getElementById('review-page').classList.remove('hidden');
+            currentCardIndex = 0;
+            updateCard();
+        }
+
+        function showPractice() {
+            document.getElementById('main-page').classList.add('hidden');
+            document.getElementById('practice-page').classList.remove('hidden');
+            // 展示练习中心
+            document.getElementById('practice-hub').classList.remove('hidden');
+            document.getElementById('question-page').classList.add('hidden');
+            updateHubLocks();
+        }
+
+        // 复习模块函数
+        function updateCard() {
+            const data = hanziData[currentCardIndex];
+            document.getElementById('hanzi-display').textContent = data.hanzi;
+            document.getElementById('pinyin-display').textContent = data.pinyin;
+            document.getElementById('meaning-display').textContent = data.meaning;
+            document.getElementById('card-counter').textContent = `${currentCardIndex + 1} / 10`;
+            
+            // 重置卡片状态
+            document.getElementById('flashcard').classList.remove('flipped');
+            
+            // 更新按钮状态
+            document.getElementById('prev-btn').disabled = currentCardIndex === 0;
+            document.getElementById('next-btn').disabled = currentCardIndex === 9;
+
+            // 同步更新音频资源
+            const reviewAudio = document.getElementById('review-audio');
+            if (reviewAudio) {
+                reviewAudio.src = getAudioSrcForHanzi(data.hanzi);
+                // 预加载，失败时不会打断流程
+                try { reviewAudio.load(); } catch (e) {}
+            }
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                updateCard();
+            }
+        }
+
+        function nextCard() {
+            if (currentCardIndex < 9) {
+                currentCardIndex++;
+                updateCard();
+            }
+        }
+
+        // 练习中心：带解锁逻辑
+        let sessionTargets = []; // 本次练习的题目目标集（用于不重复）
+        const practiceCompleted = [false, false, false, false];
+        function updateHubLocks() {
+            for (let i = 1; i < 4; i++) {
+                const card = document.getElementById(`start-${i}`);
+                const locked = !practiceCompleted[i - 1];
+                card.classList.toggle('locked', locked);
+            }
+        }
+
+        function startPractice(index) {
+            // 若未解锁则不响应
+            // 解锁限制：除练习1外，必须前一项完成
+            if (index > 0 && !practiceCompleted[index - 1]) return;
+
+            currentPractice = index;
+            currentQuestion = 0;
+            practiceScores[index] = 0;
+            practiceQuestions[index] = 0;
+            isAnswered = false;
+
+            // 准备题目池
+            if (index === 0) {
+                sessionTargets = shuffleArray([4,5,6,7,8,9,10]).slice(0,4); // 练习1：数字4~10
+            } else if (index === 1) {
+                // 练习2：随机4个汉字
+                sessionTargets = shuffleArray([...hanziData]).slice(0,4);
+            } else if (index === 2) {
+                // 练习3：随机生成4个0-99的数字
+                sessionTargets = shuffleArray(Array.from({length: 100}, (_, i) => i)).slice(0, 4);
+            } else if (index === 3) {
+                // 练习4：随机4个汉字用于音频
+                sessionTargets = shuffleArray([...hanziData]).slice(0,4);
+            }
+
+            document.getElementById('practice-hub').classList.add('hidden');
+            document.getElementById('question-page').classList.remove('hidden');
+            
+            // 为练习4添加特殊类名
+            if (index === 3) {
+                document.getElementById('question-page').classList.add('practice-4');
+            } else {
+                document.getElementById('question-page').classList.remove('practice-4');
+            }
+            
+            generateQuestionNew();
+        }
+
+        function backToHub() {
+            document.getElementById('question-page').classList.add('hidden');
+            document.getElementById('practice-hub').classList.remove('hidden');
+            updateHubLocks();
+        }
+
+        function generateQuestionNew() {
+            isAnswered = false;
+            document.getElementById('next-practice-btn').disabled = true;
+
+            // 清空选项样式
+            document.querySelectorAll('#options-box .option').forEach(option => {
+                option.classList.remove('correct', 'incorrect', 'disabled');
+            });
+
+            // 控制可见性
+            document.getElementById('question-text').classList.add('hidden');
+            document.getElementById('phone-display').classList.add('hidden');
+            document.getElementById('audio-question-btn').classList.add('hidden');
+            document.getElementById('typing-input').classList.add('hidden');
+            document.getElementById('typing-submit').classList.add('hidden');
+            document.getElementById('typing-input').value = '';
+            document.getElementById('typing-input').classList.remove('correct','incorrect');
+
+            if (currentPractice === 0) {
+                // 兜底：题库未初始化时立即初始化
+                if (!Array.isArray(sessionTargets) || sessionTargets.length < 4) {
+                    sessionTargets = shuffleArray([4,5,6,7,8,9,10]).slice(0,4);
+                    currentQuestion = 0;
+                }
+                // 数字 -> 汉字 （题目为阿拉伯数字 4~10）
+                const number = sessionTargets[currentQuestion];
+                const correctHanzi = hanziData[number - 1].hanzi;
+
+                const wrongOptions = hanziData
+                    .filter(item => item.hanzi !== correctHanzi)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 3)
+                    .map(item => item.hanzi);
+                const allOptions = shuffleArray([...wrongOptions, correctHanzi]);
+
+                const q = document.getElementById('question-text');
+                q.textContent = String(number);
+                q.classList.remove('hidden');
+                // 确保选项容器可见
+                document.getElementById('options-box').classList.remove('hidden');
+
+                document.querySelectorAll('#options-box .option').forEach((option, index) => {
+                    option.textContent = allOptions[index];
+                    option.onclick = () => selectOptionNew(option, correctHanzi);
+                });
+            } else if (currentPractice === 1) {
+                // 汉字 -> 拼音
+                const item = sessionTargets[currentQuestion];
+                const correctPinyin = item.pinyin;
+                const wrongPinyins = shuffleArray(hanziData
+                    .filter(h => h.pinyin !== correctPinyin)
+                    .map(h => h.pinyin)).slice(0,3);
+                const allOptions = shuffleArray([...wrongPinyins, correctPinyin]);
+
+                const q = document.getElementById('question-text');
+                q.textContent = item.hanzi;
+                q.classList.remove('hidden');
+
+                document.querySelectorAll('#options-box .option').forEach((option, index) => {
+                    option.textContent = allOptions[index];
+                    option.onclick = () => selectOptionNew(option, correctPinyin);
+                });
+            } else if (currentPractice === 2) {
+                // 练习3：打字输入汉字（0-99数字转汉字）
+                const number = sessionTargets[currentQuestion];
+                const targetHanzi = numberToHanzi(number);
+                currentTypingAnswer = targetHanzi;
+
+                const q = document.getElementById('question-text');
+                q.textContent = String(number); // 屏幕中展示阿拉伯数字
+                q.classList.remove('hidden');
+
+                // 显示输入框与提交按钮，隐藏选项
+                document.getElementById('options-box').classList.add('hidden');
+                const input = document.getElementById('typing-input');
+                const submitBtn = document.getElementById('typing-submit');
+                input.classList.remove('hidden');
+                submitBtn.classList.remove('hidden');
+                setTimeout(()=>input.focus(), 0);
+
+                // 允许回车提交
+                input.onkeydown = (e)=>{ if(e.key==='Enter'){ submitTyping(); } };
+            } else if (currentPractice === 3) {
+                // 听音 -> 选汉字
+                const item = sessionTargets[currentQuestion];
+                currentAudioHanzi = item.hanzi;
+                const wrongHanzi = shuffleArray(hanziData
+                    .filter(h => h.hanzi !== currentAudioHanzi)
+                    .map(h => h.hanzi)).slice(0,3);
+                const allOptions = shuffleArray([...wrongHanzi, currentAudioHanzi]);
+
+                const btn = document.getElementById('audio-question-btn');
+                btn.classList.remove('hidden');
+
+                // 显示选项
+                document.getElementById('options-box').classList.remove('hidden');
+                document.querySelectorAll('#options-box .option').forEach((option, index) => {
+                    option.textContent = allOptions[index];
+                    option.onclick = () => selectOptionNew(option, currentAudioHanzi);
+                });
+            }
+        }
+
+        // 旧版函数保留（不再使用）
+        function generateNumberToHanzi() {
+            const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            const correctNumber = numbers[Math.floor(Math.random() * numbers.length)];
+            const correctHanzi = hanziData[correctNumber - 1].hanzi;
+            
+            // 生成错误选项
+            const wrongOptions = hanziData
+                .filter(item => item.hanzi !== correctHanzi)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3)
+                .map(item => item.hanzi);
+            
+            const allOptions = [...wrongOptions, correctHanzi].sort(() => Math.random() - 0.5);
+            
+            document.getElementById('question-0').textContent = correctNumber;
+            document.querySelectorAll('#options-0 .option').forEach((option, index) => {
+                option.textContent = allOptions[index];
+                option.onclick = () => selectOption(option, correctHanzi);
+            });
+        }
+
+        function generateHanziToPinyin() {
+            const correctHanzi = hanziData[Math.floor(Math.random() * hanziData.length)];
+            const correctPinyin = correctHanzi.pinyin;
+            
+            // 生成错误拼音选项
+            const wrongPinyins = hanziData
+                .filter(item => item.pinyin !== correctPinyin)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3)
+                .map(item => item.pinyin);
+            
+            const allOptions = [...wrongPinyins, correctPinyin].sort(() => Math.random() - 0.5);
+            
+            document.getElementById('question-1').textContent = correctHanzi.hanzi;
+            document.querySelectorAll('#options-1 .option').forEach((option, index) => {
+                option.textContent = allOptions[index];
+                option.onclick = () => selectOption(option, correctPinyin);
+            });
+        }
+
+        function generatePhoneNumber() {
+            // 生成随机手机号
+            const phoneNumber = '138-' + Math.floor(Math.random() * 9000 + 1000) + '-' + Math.floor(Math.random() * 9000 + 1000);
+            const correctAnswer = phoneNumber.split('').map(char => {
+                if (char === '-') return '-';
+                return hanziData[parseInt(char)].hanzi;
+            }).join('');
+            
+            // 生成错误选项
+            const wrongAnswers = [
+                correctAnswer.split('').map((char, index) => {
+                    if (char === '-') return '-';
+                    if (index === 5) return hanziData[Math.floor(Math.random() * 10)].hanzi;
+                    return char;
+                }).join(''),
+                correctAnswer.split('').map((char, index) => {
+                    if (char === '-') return '-';
+                    if (index === 7) return hanziData[Math.floor(Math.random() * 10)].hanzi;
+                    return char;
+                }).join(''),
+                correctAnswer.split('').map((char, index) => {
+                    if (char === '-') return '-';
+                    if (index === 9) return hanziData[Math.floor(Math.random() * 10)].hanzi;
+                    return char;
+                }).join('')
+            ];
+            
+            const allOptions = [...wrongAnswers, correctAnswer].sort(() => Math.random() - 0.5);
+            
+            document.getElementById('phone-display').textContent = phoneNumber;
+            document.querySelectorAll('#options-2 .option').forEach((option, index) => {
+                option.textContent = allOptions[index];
+                option.onclick = () => selectOption(option, correctAnswer);
+            });
+        }
+
+        function generateAudioQuestion() {
+            const correctHanzi = hanziData[Math.floor(Math.random() * hanziData.length)];
+            
+            // 生成错误选项
+            const wrongOptions = hanziData
+                .filter(item => item.hanzi !== correctHanzi.hanzi)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3)
+                .map(item => item.hanzi);
+            
+            const allOptions = [...wrongOptions, correctHanzi.hanzi].sort(() => Math.random() - 0.5);
+            
+            document.querySelectorAll('#options-3 .option').forEach((option, index) => {
+                option.textContent = allOptions[index];
+                option.onclick = () => selectOption(option, correctHanzi.hanzi);
+            });
+        }
+
+        // 旧版选择逻辑已废弃
+
+        function selectOptionNew(element, correctAnswer) {
+            if (isAnswered) return;
+            isAnswered = true;
+            const selectedAnswer = element.textContent;
+            const isCorrect = selectedAnswer === correctAnswer;
+
+            document.querySelectorAll('#options-box .option').forEach(opt => {
+                opt.classList.add('disabled');
+                if (opt.textContent === correctAnswer) {
+                    opt.classList.add('correct');
+                } else if (opt === element && !isCorrect) {
+                    opt.classList.add('incorrect');
+                }
+            });
+
+            if (isCorrect) practiceScores[currentPractice]++;
+            practiceQuestions[currentPractice]++;
+            updateProgress();
+            document.getElementById('next-practice-btn').disabled = false;
+        }
+
+        function updateProgress() {
+            // 完成当前练习：当答满4题时标记完成并解锁下一项
+            if (practiceQuestions[currentPractice] >= 4) {
+                practiceCompleted[currentPractice] = true;
+                updateHubLocks();
+            }
+        }
+
+        function nextPractice() {
+            currentQuestion++;
+            if (currentQuestion >= 4) {
+                // 完成当前练习：返回练习中心；若四项皆完成，展示总结
+                const allDone = practiceCompleted.every(v => v) || currentPractice === 3;
+                backToHub();
+                if (allDone && practiceCompleted[0] && practiceCompleted[1] && practiceCompleted[2]) {
+                    showSummary();
+                }
+                return;
+            }
+            generateQuestionNew();
+        }
+
+        function playAudio() {
+            // 这里可以添加真实的音频播放功能
+            // 目前只是模拟
+            alert('播放音频: 九 (jiǔ)');
+        }
+
+        // 单题页面：听音题播放
+        function playAudioQuestion() {
+            if (!currentAudioHanzi) return;
+            const src = getAudioSrcForHanzi(currentAudioHanzi);
+            const temp = new Audio(src);
+            temp.play().catch(() => speakFallback(currentAudioHanzi));
+        }
+
+        // 提交打字答案
+        function submitTyping() {
+            if (isAnswered) return;
+            const input = document.getElementById('typing-input');
+            const value = (input.value || '').trim();
+            const isCorrect = value === currentTypingAnswer;
+            isAnswered = true;
+            if (isCorrect) {
+                input.classList.add('correct');
+                practiceScores[currentPractice]++;
+            } else {
+                input.classList.add('incorrect');
+            }
+            practiceQuestions[currentPractice]++;
+            updateProgress();
+            document.getElementById('next-practice-btn').disabled = false;
+        }
+
+        // 工具函数
+        function shuffleArray(arr) {
+            return arr
+                .map(v => ({ v, r: Math.random() }))
+                .sort((a, b) => a.r - b.r)
+                .map(({ v }) => v);
+        }
+
+        function genPhone() {
+            const rand4 = () => String(Math.floor(Math.random() * 9000 + 1000));
+            return '1' + String(Math.floor(Math.random() * 8) + 2) + String(Math.floor(Math.random() * 8) + 1) + '-' + rand4() + '-' + rand4();
+        }
+
+        function phoneToHanzi(phone) {
+            return phone.split('').map(ch => ch === '-' ? '-' : hanziData[parseInt(ch)].hanzi).join('');
+        }
+
+        function genPhoneWrongOptions(correct) {
+            // 生成3个干扰项：随机替换某些位置的数字
+            const idxs = [5,7,9];
+            const make = i => correct.split('').map((ch, idx) => {
+                if (ch === '-') return '-';
+                if (idx === idxs[i]) {
+                    return hanziData[Math.floor(Math.random() * 10)].hanzi;
+                }
+                return ch;
+            }).join('');
+            return [make(0), make(1), make(2)];
+        }
+
+        // 数字转汉字（0-99）
+        function numberToHanzi(num) {
+            if (num === 0) return '零';
+            if (num <= 10) return hanziData[num - 1].hanzi;
+            
+            const tens = Math.floor(num / 10);
+            const ones = num % 10;
+            
+            if (tens === 1) {
+                return ones === 0 ? '十' : '十' + hanziData[ones - 1].hanzi;
+            } else {
+                const tensHanzi = hanziData[tens - 1].hanzi;
+                return ones === 0 ? tensHanzi + '十' : tensHanzi + '十' + hanziData[ones - 1].hanzi;
+            }
+        }
+
+        // ===== 复习模块: 音频播放 =====
+        function getAudioSrcForHanzi(hanzi) {
+            // 将汉字映射到音频文件名
+            const map = {
+                '一': 'yi',
+                '二': 'er',
+                '三': 'san',
+                '四': 'si',
+                '五': 'wu',
+                '六': 'liu',
+                '七': 'qi',
+                '八': 'ba',
+                '九': 'jiu',
+                '十': 'shi'
+            };
+            const key = map[hanzi];
+            return key ? `01audio/${key}.mp3` : '';
+        }
+
+        function speakFallback(text) {
+            try {
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = 'zh-CN';
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utter);
+            } catch (e) {
+                // 忽略语音合成不可用的情况
+            }
+        }
+
+        function playReviewAudio() {
+            event.stopPropagation();
+            const data = hanziData[currentCardIndex];
+            const audioEl = document.getElementById('review-audio');
+            if (!audioEl) return;
+
+            // 设置一次性错误回退
+            const onError = () => {
+                audioEl.removeEventListener('error', onError);
+                speakFallback(data.hanzi);
+            };
+            audioEl.removeEventListener('error', onError);
+            audioEl.addEventListener('error', onError, { once: true });
+
+            audioEl.src = getAudioSrcForHanzi(data.hanzi);
+            audioEl.play().catch(() => speakFallback(data.hanzi));
+        }
+
+        function showSummary() {
+            document.getElementById('practice-page').classList.add('hidden');
+            document.getElementById('summary-page').classList.remove('hidden');
+            
+            const totalScore = practiceScores.reduce((a, b) => a + b, 0);
+            const totalQuestions = practiceQuestions.reduce((a, b) => a + b, 0);
+            const percentage = totalQuestions > 0 ? Math.round((totalScore / totalQuestions) * 100) : 0;
+            
+            document.getElementById('final-score').textContent = `${percentage}%`;
+            document.getElementById('score-circle').style.setProperty('--score-angle', `${percentage * 3.6}deg`);
+            
+            let summaryText = `恭喜你完成了第一课的所有练习！\n`;
+            summaryText += `总得分: ${totalScore} / ${totalQuestions}\n`;
+            summaryText += `正确率: ${percentage}%`;
+            
+            if (percentage >= 90) {
+                summaryText += `\n\n🎉 优秀！你的表现非常出色！`;
+            } else if (percentage >= 80) {
+                summaryText += `\n\n👍 很好！继续加油！`;
+            } else if (percentage >= 70) {
+                summaryText += `\n\n💪 不错！再练习一下会更好！`;
+            } else {
+                summaryText += `\n\n📚 需要多加练习，加油！`;
+            }
+            
+            document.getElementById('summary-text').textContent = summaryText;
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            showMain();
+        });
+    </script>
+</body>
+</html>
