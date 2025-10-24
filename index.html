@@ -678,7 +678,7 @@
             .audio-btn {
                 padding: 8px 16px;
                 font-size: 0.8em;
-                margin: 10px 0;
+                margin: -10px 0 10px 0;
                 width:50px;
                 height:50px;
 
@@ -1379,9 +1379,11 @@
             console.log('音频源路径:', audioSrc);
 
             // 设置错误处理
-            const onError = () => {
-                console.error('音频文件加载失败:', audioSrc);
+            const onError = (e) => {
+                console.error('音频文件加载失败:', audioSrc, e);
                 audioEl.removeEventListener('error', onError);
+                // 如果音频文件失败，尝试语音合成
+                speakFallback(data.hanzi);
             };
             
             const onLoadStart = () => {
@@ -1401,12 +1403,14 @@
             audioEl.addEventListener('canplay', onCanPlay, { once: true });
 
             audioEl.src = audioSrc;
-            audioEl.load(); // 强制重新加载
+            audioEl.load();
             
             audioEl.play().then(() => {
                 console.log('音频播放成功');
             }).catch((error) => {
                 console.error('音频播放失败:', error);
+                // 如果播放失败，尝试语音合成
+                speakFallback(data.hanzi);
             });
         }
 
