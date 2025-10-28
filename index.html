@@ -849,8 +849,20 @@
             }
             
             /* 移动端：详情页容器占满整个屏幕，不留背景 */
+            body:has(#detail-page:not(.hidden)) {
+                padding: 0;
+                margin: 0;
+                display: block;
+                align-items: stretch;
+            }
             #detail-page {
-                min-height: 100vh;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                overflow-y: auto;
+                background: #ffffff;
             }
             #detail-page .detail-container {
                 width: 100%;
