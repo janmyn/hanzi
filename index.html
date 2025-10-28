@@ -782,7 +782,7 @@
             }
             /* 移动端：保持现有布局，Home 单独左上角 */
             #practice-page .practice-header { display: block; }
-            #practice-page .practice-header .back-home-btn { position: absolute; left: 5px; top: 3px; }
+            #practice-page .practice-header .back-home-btn { position: absolute; left: 10px; top: 3px; }
             #practice-page .practice-header .title { display: block; }
             
             .nav-btn {
@@ -848,12 +848,18 @@
                 font-size: 1.5em;
             }
             
-            /* 移动端：详情页容器与表格100%宽度 */
+            /* 移动端：详情页容器占满整个屏幕，不留背景 */
+            #detail-page {
+                min-height: 100vh;
+            }
             #detail-page .detail-container {
                 width: 100%;
                 max-width: 100%;
-                padding: 0px;
+                min-height: 100vh;
+                padding: 10px;
                 box-sizing: border-box;
+                margin: 0;
+                border-radius: 0;
             }
             #detail-page .detail-table {
                 width: 100%;
