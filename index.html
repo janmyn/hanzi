@@ -6,6 +6,24 @@
     <title>01</title>
     <link rel="stylesheet" href="//at.alicdn.com/t/c/font_5046375_njawe1hwe8.css">
     <style>
+        /* 自定义字体：楷体 - 确保所有设备都能加载 */
+        @font-face {
+            font-family: 'CustomKaiTi';
+            src: url('fonts/FangZhengKaiTiJianTi/KaiTi.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap; /* 优化字体加载体验 */
+        }
+
+        /* 自定义字体：Roboto */
+        @font-face {
+            font-family: 'CustomRoboto';
+            src: url('fonts/Roboto/Roboto-Regular-14.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
         * {
             margin: 0px;
             padding: 0;
@@ -13,7 +31,7 @@
         }
 
         body {
-            font-family: 'Roboto', 'Didot', 'Futura', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-family: 'CustomRoboto', 'Roboto', 'Didot', 'Futura', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             background: #2d2d42;
             min-height: 100vh;
             display: flex;
@@ -21,9 +39,9 @@
             align-items: center;
         }
 
-        /* 汉字使用楷体 */
+        /* 汉字使用楷体 - 优先使用自定义字体 */
         .hanzi, #hanzi-display, .question, .option, .phone-display, .pinyin, .meaning {
-            font-family: 'KaiTi', '楷体', 'STKaiti', '华文楷体', serif !important;
+            font-family: 'CustomKaiTi', 'KaiTi', '楷体', 'STKaiti', '华文楷体', serif !important;
         }
 
         .title {
@@ -325,7 +343,7 @@
             text-align: center;
             outline: none;
             transition: all 0.2s ease;
-            font-family: 'KaiTi', '楷体', 'STKaiti', '华文楷体', serif;
+            font-family: 'CustomKaiTi', 'KaiTi', '楷体', 'STKaiti', '华文楷体', serif;
         }
         .typing-input:focus { border-color: #4ecdc4; box-shadow: 0 0 0 4px rgba(78,205,196,0.15); }
         .typing-input.correct { border-color: #feffe4; background: #f0fff2; }
@@ -542,12 +560,12 @@
         /* 详情页表格中文字体使用楷体，英文/数字用 .latin 指定 */
         #detail-page .detail-table,
         #detail-page .detail-table td {
-            font-family: 'KaiTi', '楷体', 'STKaiti', '华文楷体', serif;
+            font-family: 'CustomKaiTi', 'KaiTi', '楷体', 'STKaiti', '华文楷体', serif;
         }
         /* 表头为英文，采用 Roboto */
-        #detail-page .detail-table th { font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
+        #detail-page .detail-table th { font-family: 'CustomRoboto', 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
         /* 英文与数字专用字体 */
-        #detail-page .latin { font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
+        #detail-page .latin { font-family: 'CustomRoboto', 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
         .detail-table th, .detail-table td {
             padding: 10px 12px;
             border-bottom: 1px solid #eee;
